@@ -7,8 +7,11 @@ import os
 import requests, threading
 import random, string
 from gtts import gTTS
+import smtplib
+import webbrowser
 
 #create files for main program
+#<-- DO NOT EDIT THIS FUNCTION --> 
 def mnf():
 
     ml = ['xanax','oxycodone','loratadine','tramadol','temazapam','senokot','fentanyl']
@@ -45,6 +48,7 @@ def mnf():
 # end create med list
 mnf()
 #write lines to text file and admin meds
+#<-- DO NOT EDIT THIS FUNCTION -->
 def w2f(mn):
     if mn == 'xanax':
         x = input('Please enter your name: ')
@@ -60,6 +64,9 @@ def w2f(mn):
 
         print(Fore.WHITE+ Back.GREEN+'Xanax has been administered'+Style.RESET_ALL)
         print(Fore.WHITE+ Back.YELLOW+'next pill to be administered at '+ str(xtt) + Style.RESET_ALL)
+
+        message = f'{mn} has been adminstered by {x} the next dose is due at {xtt}'
+        emailc(message)
 
         xsr = '\n' + str(xtt) +' xanax'
         xs = open('medschedule', 'a')
@@ -79,6 +86,9 @@ def w2f(mn):
         medfile.writelines(oi)
         medfile.close()
         medfile = open('medfile','r+')
+
+        message = f'{mn} has been adminstered by {o} the next dose is due at {ott}'
+        emailc(message)
 
         print(Fore.WHITE + Back.GREEN +'oxycodone has been administered'+Style.RESET_ALL)
         print(Fore.WHITE + Back.YELLOW +'next pill to be administered at '+ str(ott)+Style.RESET_ALL)
@@ -102,6 +112,9 @@ def w2f(mn):
         medfile.close()
         medfile = open('medfile','r+')
 
+        message = f'{mn} has been adminstered by {ln} the next dose is due at {ltt}'
+        emailc(message)
+
         print(Fore.WHITE + Back.GREEN + 'oxycodone has been administered'+Style.RESET_ALL)
         print(Fore.WHITE + Back.YELLOW +'next pill to be administered at '+ str(ltt)+Style.RESET_ALL)
 
@@ -123,6 +136,9 @@ def w2f(mn):
         medfile.writelines(ti)
         medfile.close()
         medfile = open('medfile','r+')
+
+        message = f'{mn} has been adminstered by {tn} the next dose is due at {ttt}'
+        emailc(message)
 
         print(Fore.WHITE + Back.GREEN+ 'Tramadol has been administered'+Style.RESET_ALL)
         print(Fore.WHITE + Back.YELLOW+ 'next pill to be administered at '+ str(ttt)+Style.RESET_ALL)
@@ -146,6 +162,9 @@ def w2f(mn):
         medfile.close()
         medfile = open('medfile','r+')
 
+        message = f'{mn} has been adminstered by {ten} the next dose is due at {tte}'
+        emailc(message)
+
         print(Fore.WHITE + Back.GREEN +'temazepam has been administered'+Style.RESET_ALL)
         print(Fore.WHITE + Back.YELLOW +'next pill to be administered at '+ str(tte)+Style.RESET_ALL)
 
@@ -168,6 +187,9 @@ def w2f(mn):
         medfile.close()
         medfile = open('medfile','r+')
 
+        message = f'{mn} has been adminstered by {sen} the next dose is due at {ste}'
+        emailc(message)
+
         print(Fore.WHITE + Back.GREEN+'Senokot has been administered'+Style.RESET_ALL)
         print(Fore.WHITE + Back.YELLOW+'next pill to be administered at '+ str(ste)+Style.RESET_ALL)
 
@@ -181,7 +203,7 @@ def w2f(mn):
         fen = input('Please enter your name: ')
         fet = time.strftime('%Y-%m-%d %H:%M:%S')
         fte = time.strftime('%H:%m')
-        fre = datetime.now() + timedelta(hours=24)
+        fre = datetime.now() + timedelta(hours=0.1)
 
         fe = '-----------------' + '\n' + fen +' has administered '+ mn +' at '+ fet + '-----------------' 
 
@@ -189,6 +211,9 @@ def w2f(mn):
         medfile.writelines(fe)
         medfile.close()
         medfile = open('medfile','r+')
+
+        message = f'{mn} has been adminstered by {fen} the next dose is due at {fre}'
+        emailc(message)
 
         print(Fore.WHITE + Back.GREEN+'oxycodone has been administered'+Style.RESET_ALL)
         print(Fore.WHITE + Back.YELLOW+'next pill to be administered at '+ str(fre)+Style.RESET_ALL)
@@ -220,38 +245,70 @@ def tts(m,s):
         print('error with file handling or error with tts.')
 global m,s
 #END TTS
-def mrn():
-        while True:
-            mnf()
-            ml()
-            ps = open('medschedule', 'r')
-            pi = ps.readlines()
-            for i in pi:
-                td = str(datetime.now())
-
-                if td in i:
-                    timer = threading.Timer(1.0,mrn)
-                    timer.start()
-                    message = f'{i} is due to be administered please make sure you log this actvity in the medreminder system. \n If you get lost and need help please type help in medreminder to see all options'
-                    print(message)
-                    return requests.post(
-                    "https://api.mailgun.net/v3/sandbox167904bdf2224e25b135bd1143774c49.mailgun.org/messages",
-                    auth=("api", "43ddbc2130afdb049e91f373ab8ab01b-381f2624-f5e1b8d6"),
-                    data={"from": "Med reminder <postmaster@sandbox167904bdf2224e25b135bd1143774c49.mailgun.org>",
-                    "to": "christopher schellenger <schellengercrew@gmail.com>",
-                    "subject": "Hello christopher schellenger",
-                    "text": (message)})
-                elif td not in i:
-                    pass
-                else:
-                    print(Fore.WHITE + Back.RED+'Error reading file please contact support' + '\n' + '-error 2'+Style.RESET_ALL)
-                    timer.cancel()
+#GLOBAL VARIABLES 
 global mn
 global nm
+#END GLOBAL VARIABLES 
+#email conntection
+#<-- DO NOT EDIT THIS FUNCTION -->
+def emailc(message):
+    e = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    e.ehlo
+    e.starttls
+    e.ehlo
+    e.login("publicmedreminder@gmail.com","ahdn auvk bpnv vfeo")
+    msg = f'''\
+... Subject: Medreminder notifaction...
+...
+...  {message} ''' 
+    e.sendmail("publicmedreminder@gmail.com",'schellengercrew@gmail.com', msg)
+    e.quit
+#endemail connection
+#scheduled emails
+#<-- DO NOT EDIT THIS FUNCTION -->
+def sche():
+    cnt = 0
+    fl = open('medschedule','r')
+    s = fl.readlines()
+    td = datetime.now()
+    for i in s:
+        if i == td:
+            cnt = 0
+            message = f'Important notifaction from medreminder:{i} \nPlease log activity in medreminder so we can continue to remind you'
+            emailc(message)
+        else:
+            if cnt <3:
+                cnt = cnt+1
+                k = threading.Timer(60,sche)
+                k.start()
+            elif cnt ==3:
+                time.sleep(5.0)
+                break
+                
+
+            
+            
+    fl.close()
+#end scheduled emails 
+#pill ident
+#<-- DO NOT EDIT THIS FUNCTION -->
+def pillid():
+    print('<-- launching pill ident in a webbrowser -->')
+    time.sleep(5.0)
+    webbrowser.open_new('https://www.drugs.com/imprints.php')
+#end pill ident 
+#med interaction check
+#<-- DO NOT EDIT THIS FUNCTION -->
+def medint():
+    print('<-- launching Medication interaction checker in a webbrowser -->')
+    time.sleep(5.0)
+    webbrowser.open_new('https://www.drugs.com/drug_interactions.html')
+#end med interaction check
+#<-- DO NOT EDIT THIS FUNCTION -->
 def med_reminder():
     while True:
-
         #mrn()
+        sche()
         cprint('\n-----MED REMINDER-----','blue')
         ad = input('What would you like to do? ')
         if ad.lower() == 'admin meds':
@@ -273,51 +330,14 @@ def med_reminder():
 
         elif ad.lower() == 'med info':
             print('welcome to the med information section')
-            di = input('Please enter med name that you would like to learn about: ')
+            di = input('\n**This is will open a webbrowser window**\n\nPlease enter med name that you would like to learn about: ')
             di.lower()
-            if di == 'xanax' or di == 'alprazolam':
-                xi = open('/Users/bubba/xanax drug info', 'r')
-                xc = xi.read()
-                print(xc)
-                xi.close()
-
-            elif di == 'oxycodone':
-                oi = open('/Users/bubba/oi.text', 'r')
-                oc = oi.read()
-                print(oc)
-                oi.close()
-
-            elif di == 'loratadine':
-                li = open('/Users/bubba/li.txt', 'r')
-                lc = li.read()
-                print(lc)
-                li.close()
-
-            elif di == 'tramadol':
-                ti = open('/Users/bubba/ti.txt', 'r')
-                tc = ti.read()
-                print(tc)
-                ti.close()
-
-            elif di == 'temazepam':
-                te = open('/Users/bubba/te.txt', 'r')
-                tc = te.read()
-                print(tc)
-                te.close()
-
-
-            elif di == 'senokot':
-                si = open('/Users/bubba/si.txt', 'r')
-                sc = si.read()
-                print(sc)
-                si.close()
-
-
-            elif di == 'fentanyl':
-                fi = open('/Users/bubba/fi.txt', 'r')
-                fc = fi.read()
-                print(fc)
-                fi.close()
+            message = 'Opening webbrowser' 
+            print(message)
+            print('\nYou can search for any drug in this system')
+            time.sleep(5.0)
+            webbrowser.open_new(f'https://www.drugs.com/{di}.html')
+            
 
 
         elif ad.lower() == 'note':
@@ -360,23 +380,24 @@ def med_reminder():
         
         elif ad.lower() == 'nurse':
             ny = input('Please enter your name: ')
+            print('For yes enter "yes" if no press enter')
             ni = input('Would you like to add any notes about todays visit?: ')
             td = time.strftime('%Y-%m-%d %H:%M:%S')
             if ni == 'yes':
                 nn = input('Enter your notes now: ')
                 d= '\n-------------------------------------------'+'\n' +td +'\nNurse Name: '+ ny + '\nNurse Notes: '+ nn + '\n-------------------------------------------'
-                nv = open('/Users/bubba/nurse.txt', 'a')
+                nv = open('nurse.txt', 'a')
                 nv.writelines(d)
                 nv.close()
-                nv = open('/Users/bubba/nurse.txt','r+')
+                nv = open('nurse.txt','r+')
             else:
 
                 e = '\n-------------------------------------------'+'\n' +td +'\nNurse Name: '+ ny + '\nNurse did not enter any notes'+'\n-------------------------------------------'
 
-                nv1 = open('/Users/bubba/nurse.txt', 'a')
+                nv1 = open('nurse.txt', 'a')
                 nv1.writelines(e)
                 nv1.close()
-                nv1 = open('/Users/bubba/nurse.txt','r+')
+                nv1 = open('nurse.txt','r+')
                 
         
 
@@ -429,7 +450,16 @@ def med_reminder():
 
         elif ad.lower() == 'help':
             print('------ Terms within the system ------')
-            print('\n Admin meds - To log when you administered medication \n Med info - To get information about a specific medication \n Note - To log any notes \n Nurse - For a nurse to be able to log any notes about a specific visit \n Vitials - To log patient vitals \n Covid test - To log a covid test and what type was taken \n Print notes - Shows all notes in the system \n Print meds - Shows all meds in the system \n Print schedule - Shows a current and past schedule for the meds in the system \n Print activity - Shows all activity within a system and also shows who did a certain task and at which time \n Print covid test - Shows all past covid tests that have been logged into the system \n Quit - To exit the system')
+            print('\n Admin meds - To log when you administered medication \n Med info - To get information about a specific medication \n Note - To log any notes \n Nurse - For a nurse to be able to log any notes about a specific visit \n Vitials - To log patient vitals \n Covid test - To log a covid test and what type was taken \n Print notes - Shows all notes in the system \n Print meds - Shows all meds in the system \n Print schedule - Shows a current and past schedule for the meds in the system \n Print activity - Shows all activity within a system and also shows who did a certain task and at which time \n Print covid test - Shows all past covid tests that have been logged into the system \n Pill ident - Helps you idenify unknown pills (this feature launches in a new window externally \n Med int - Helps you check interactions between two medications (this feature launches in a new window)\n Quit - To exit the system')
         #texttospeech() https://towardsdatascience.com/easy-text-to-speech-with-python-bfb34250036e
+
+        elif ad.lower()  == 'pill ident':
+            pillid()
+        elif ad.lower() == 'med int':
+            medint()
+
+
+#main program call 
+#<-- DO NOT ERASE -->
 med_reminder()
 
